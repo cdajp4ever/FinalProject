@@ -1,48 +1,67 @@
-package Fproject;
+package Project;
+
+import java.util.*;
+import javafx.scene.image.Image;
 
 public class Deck {
+    private java.util.List deck;
+    private int index;
 
-    private Card[] deck;   // An array of 52 Cards, representing the deck.
-    private int cardsUsed; // How many cards have been dealt from the deck.
+    public Deck(){ this(1); }
+    public Deck(int numDecks) {
+        deck = new ArrayList();
+        index = 0;
 
-    public Deck() {
-        // Create an unshuffled deck of cards.
-        deck = new Card[52];
-        int cardCt = 0; // How many cards have been created so far.
-        for ( int suit = 0; suit <= 3; suit++ ) {
-            for ( int value = 1; value <= 13; value++ ) {
-                deck[cardCt] = new Card(value,suit);
-                cardCt++;
+        try{
+            for(int i = 0; i<numDecks; i++){
+                Iterator suitIterator = Suit.VALUES.iterator();
+                while ( suitIterator.hasNext() ) {
+                    Suit suit = (Suit) suitIterator.next();
+                    Iterator rankIterator = Rank.VALUES.iterator();
+                    while ( rankIterator.hasNext() ) {
+                        Rank rank = (Rank) rankIterator.next();
+                        Card card = new Card( suit, rank, new Image(Card.getFilename( suit, rank )) );
+                        addCard( card );
+                    }
+                }
             }
+            shuffle();
+        } catch (Exception ex){
+            System.out.println(ex.getMessage());
         }
-        cardsUsed = 0;
     }
 
-    public void shuffle() {
-        // Put all the used cards back into the deck, and shuffle it into
-        // a random order.
-        for ( int i = 51; i > 0; i-- ) {
-            int rand = (int)(Math.random()*(i+1));
-            Card temp = deck[i];
-            deck[i] = deck[rand];
-            deck[rand] = temp;
-        }
-        cardsUsed = 0;
+    public void addCard( Card card ) {
+        deck.add( card );
     }
 
-    public int cardsLeft() {
-        // As cards are dealt from the deck, the number of cards left
-        // decreases.  This function returns the number of cards that
-        // are still left in the deck.
-        return 52 - cardsUsed;
+    public int getSizeOfDeck() {
+        return deck.size();
+    }
+
+    public int getNumberOfCardsRemaining() {
+        return deck.size() - index;
     }
 
     public Card dealCard() {
-        // Deals one card from the deck and returns it.
-        if (cardsUsed == 52)
-            shuffle();
-        cardsUsed++;
-        return deck[cardsUsed - 1];
+        if ( index >= deck.size() )
+            return null;
+        else
+            return (Card) deck.get( index++ );
     }
 
-} // end class Deck
+    public void shuffle() {
+        Collections.shuffle( deck );
+    }
+
+    public boolean isEmpty() {
+        if ( index >= deck.size() )
+            return true;
+        else
+            return false;
+    }
+
+    public void restoreDeck() {
+        index = 0;
+    }
+}
